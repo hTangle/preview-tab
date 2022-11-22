@@ -3,13 +3,13 @@ import {BingImage, getImageFromImages} from "@/types/bing";
 import {LStorage} from "@/service/storage_service";
 
 
-export async function getBingDailyImage() {
+export async function getBingDailyImage(idx:number=0) {
   return bingRequest({
     method: "get",
     url: "https://cn.bing.com/HPImageArchive.aspx",
     params: {
       format: "js", // 返回数据格式，jx或者xml
-      idx: 0, // 请求图片截至天数 0 今天，-1 明天，1 昨天
+      idx: idx, // 请求图片截至天数 0 今天，-1 明天，1 昨天
       n: 1, // 1-8，返回图片的数量
       uhd:1,
       w:3840,

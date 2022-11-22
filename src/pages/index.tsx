@@ -35,6 +35,8 @@ export default function HomePage() {
     const [bgImage, setBgImage] = useState(`url("https://www.bing.com/th?id=OHR.MountAbu_ZH-CN1348295593_1920x1080.jpg&rf=LaDigue_1920x1080.jpg&pid=hp")`)
     const searchEngines: SearchEngine[] = [GoogleSearch, BaiduSearch, BingSearch];
     const [currentSearchEngine, setCurrentSearchEngine] = useState<SearchEngine>(getCurrentSearchEngine())
+    const [idx,setIdx]=useState(0);
+    const [imageDay,setImageDay]=useState()
 
     const [mainStyle, setMainStyle] = useState<CSSProperties>({
         textAlign: "center",
@@ -46,6 +48,10 @@ export default function HomePage() {
         backgroundRepeat: "no-repeat",
         backgroundImage: bgImage
     })
+
+    const updateBackgroundImage=()=>{
+
+    }
 
     useEffect(() => {
         const date: Date = new Date()
