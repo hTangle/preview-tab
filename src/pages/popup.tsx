@@ -8,7 +8,7 @@ const Popup = () => {
     const [newHttpUrlName, setNewHttpUrlName] = useState("")
     const [isValidHttpUrlName, setIsValidHttpUrlName] = useState(true)
     return (
-        <Stack>
+        <Stack style={{minWidth:"500px",minHeight:"200px",margin:"10px 10px 10px 10px"}}>
             <TextField id="standard-basic" defaultValue={newHttpUrl}
                        helperText={isValidHttpUrl ? "" : "请输入合法网址，以https或http开头"}
                        error={!isValidHttpUrl} label="URL" variant="standard" onChange={(value) => {

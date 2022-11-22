@@ -1,12 +1,20 @@
-export default {
+import { defineConfig } from 'umi';
+
+export default defineConfig({
   npmClient: 'yarn',
   exportStatic:{
-    htmlSuffix: true,
   },
   cssMinifier: 'esbuild',
   cssMinifierOptions: {
     minifyWhitespace: true,
     minifySyntax: true,
   },
-  dynamicImport: {},
-};
+  routes:[
+    { exact: true, path: '/', component: 'index' },
+    { exact: true, path: '/main.html', component: 'index' },
+    { exact: true, path: '/docs', component: 'docs' },
+    { exact: true, path: '/docs.html', component: 'docs' },
+    { exact: true, path: '/popup', component: 'popup' },
+    { exact: true, path: '/popup.html', component: 'popup' },
+  ]
+});
