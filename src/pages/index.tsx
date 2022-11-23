@@ -11,7 +11,12 @@ import SearchIcon from '@mui/icons-material/Search';
 import TimeShower from "@/component/time_shower";
 import {CSSProperties, useEffect, useState} from "react";
 import AddIcon from '@mui/icons-material/Add';
-import {getBingDailyImage, getBingTodayImage, setBingTodayImage} from "@/service/bing_image_service";
+import {
+    getBingDailyImage,
+    getBingHistoryDayImage,
+    getBingTodayImage, setBingImages,
+    setBingTodayImage
+} from "@/service/bing_image_service";
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
@@ -24,19 +29,14 @@ import {BaiduSearch, BingSearch, GoogleSearch, SearchEngine} from "@/types/searc
 import {getCurrentSearchEngine, getSearchUrl, setDefaultSearchEngine} from "@/service/search";
 import TabSearchIcon from "@/component/search_icon";
 import {useLocation} from "react-router-dom";
-export default function HomePage() {
-    const search = useLocation().search;
-    const name = new URLSearchParams(search).get('name');
-    console.log(name)
-    // if(name==="option"){
-    //   return (<Popup />)
-    // }
+import {BingImage} from "@/types/bing";
 
+export default function HomePage() {
     const [bgImage, setBgImage] = useState(`url("https://www.bing.com/th?id=OHR.MountAbu_ZH-CN1348295593_1920x1080.jpg&rf=LaDigue_1920x1080.jpg&pid=hp")`)
     const searchEngines: SearchEngine[] = [GoogleSearch, BaiduSearch, BingSearch];
     const [currentSearchEngine, setCurrentSearchEngine] = useState<SearchEngine>(getCurrentSearchEngine())
-    const [idx,setIdx]=useState(0);
-    const [imageDay,setImageDay]=useState()
+    const [idx, setIdx] = useState(0);
+    const [imageDay, setImageDay] = useState()
 
     const [mainStyle, setMainStyle] = useState<CSSProperties>({
         textAlign: "center",
@@ -49,8 +49,27 @@ export default function HomePage() {
         backgroundImage: bgImage
     })
 
-    const updateBackgroundImage=()=>{
-
+    const updateBackgroundImage = (n: number) => {
+        console.log("before idx:", idx)
+        if ((n > 0 && idx >= 1) || (n < 0 && idx < -6)) {
+            return
+        }
+        setIdx(idx + n)
+        console.log("current idx:", idx)
+        const img: BingImage | undefined = getBingHistoryDayImage(idx)
+        if (img && img.url) {
+            setBgImage(`url("https://www.bing.com${img.url}")`)
+        }else{
+            if (idx <= 1 && idx > -7) {
+                //only recent 7 days can get
+                getBingDailyImage(idx).then((result) => {
+                    if (result && result.images?.length > 0) {
+                        setBingImages(result.images)
+                        setBgImage(`url("https://www.bing.com${result.images[0].url}")`)
+                    }
+                })
+            }
+        }
     }
 
     useEffect(() => {
@@ -173,23 +192,28 @@ export default function HomePage() {
                         <SearchIcon/>
                     </IconButton>
                 </Paper>
-                <Space size={[6, 16]} wrap style={{margin: "100px auto", textAlign: "center", width: "100vh"}}>
+                <Space size={[6, 16]} wrap style={{margin: "100px auto", textAlign: "center", width: "100vh",backgroundColor:"rgba(211,211,211, .4)"}}>
                     {
                         collections.map((value, index) => (
                             <CollectionButton collection={value} update_collection={refreshCollection}/>
                         ))
                     }
                     <IconButton style={{textAlign: "center", display: "table", width: "100px", height: "120px"}}
-                                onClick={showModal} color="success">
-                        <AddIcon/>
+                                onClick={showModal} size="large">
+                        <AddIcon
+                            style={{borderRadius: "30px", backgroundColor: "white", width: "30px", height: "30px"}}/>
                     </IconButton>
                 </Space>
             </Container>
             <div style={{position: "fixed", bottom: "3%", right: "2%"}}>
-                <Fab size="small" aria-label="add">
+                <Fab size="small" aria-label="add" onClick={() => {
+                    updateBackgroundImage(-1)
+                }}>
                     <KeyboardArrowLeftIcon/>
                 </Fab>
-                <Fab size="small" aria-label="edit">
+                <Fab size="small" aria-label="edit" onClick={() => {
+                    updateBackgroundImage(1)
+                }}>
                     <KeyboardArrowRightIcon/>
                 </Fab>
             </div>

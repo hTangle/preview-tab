@@ -19,6 +19,7 @@
     "antd": "^5.0.0",
     "axios": "^1.1.3",
     "crypto-js": "^4.1.1",
+    "dayjs": "^1.11.6",
     "lunar-typescript": "^1.2.23",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

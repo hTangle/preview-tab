@@ -9,6 +9,12 @@ export default defineConfig({
     minifyWhitespace: true,
     minifySyntax: true,
   },
+  proxy: {
+    "/HPImageArchive.aspx": {
+      "target": "https://cn.bing.com/",
+      "changeOrigin": true,
+    }
+  },
   routes:[
     { exact: true, path: '/', component: 'index' },
     { exact: true, path: '/main.html', component: 'index' },

@@ -13,7 +13,7 @@ export default function CollectionButton(props: any) {
   const collection: Collection = props.collection;
   const updateCollection=props.update_collection;
   return (
-    <IconButton style={{textAlign: "center", display: "table", width: "100px", height: "120px"}} href={collection.url}>
+    <IconButton style={{textAlign: "center", display: "table", width: "100px", height: "120px",marginTop:"30px"}} href={collection.url}>
       <div style={{textAlign: "center", margin: "0px auto", display: "table-cell"}}>
         <img src={`${collection.icon}`} style={{width: "42px", height: "42px"}}
              alt={`${collection.title}`}/>
