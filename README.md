@@ -1,6 +1,9 @@
 # preview-tab[chrome/edge extension]
 The new tab page of the edge browser is very difficult to use, 
 so I try to write a simple new tab page to replace it.
+> All your data is in your browser storage!!! 
+> 
+> All delete should think twice
 ## Screenshot of extension
 * new tab page
   ![new tab page](https://image.ahsup.top/20221126200053.png)
