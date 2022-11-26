@@ -1,101 +1,32 @@
-import {bingRequest} from "@/service/requests";
-import {BingImage, getImageFromImages} from "@/types/bing";
+import {bingPageRequest, bingTotalRequest} from "@/service/requests";
 import {LStorage} from "@/service/storage_service";
-import dayjs from "dayjs";
 
-
-export async function getBingDailyImage(idx: number = 0) {
-    return bingRequest({
+export async function getBingImages(page: number, page_size: number = 12) {
+    return bingPageRequest({
         method: "get",
-        //url: "/HPImageArchive.aspx",
-         url: "https://cn.bing.com/HPImageArchive.aspx",
+        url: "/bing/page",
         params: {
-            format: "js", // 返回数据格式，jx或者xml
-            idx: 0, // 请求图片截至天数 0 今天，-1 明天，1 昨天
-            n: 8, // 1-8，返回图片的数量
-            uhd: 1,
-            w: 3840,
-            h: 2160
+            page: page,
+            page_size: page_size
         }
     })
 }
 
-export function getBingDateFormat(date: Date) {
-    let month: string | number = date.getMonth() + 1
-    let strDate: string | number = date.getDate()
-    if (month <= 9) {
-        month = "0" + month
-    }
-    if (strDate <= 9) {
-        strDate = "0" + strDate;
-    }
-    return date.getFullYear() + "" + month + strDate
+export async function getBingTotalImages() {
+    return bingTotalRequest({
+        method: "get",
+        url: "/bing",
+    })
 }
 
-export function getBingTodayImage(date: Date) {
-    //首先从缓存中获取
-    const images: BingImage[] = LStorage.get("bing_image_daily")
-    const key = getBingDateFormat(date)
-    const image = getImageFromImages(key, images)
-    if (image) {
+export function getBackgroundImage() {
+    const image: string = LStorage.get("background-image")
+    if (image && image.length > 10) {
         return image
     }
+    return "https://bing.com/th?id=OHR.TurenneSunrise_ZH-CN2357226217_UHD.jpg&rf=LaDigue_UHD.jpg&pid=hp"
 }
 
-export function getBingHistoryDayImage(idx: number) {
-    //先用date做运算
-    const images: BingImage[] = LStorage.get("bing_image_daily")
-    const key = dayjs().add(idx, "day").format("YYYYMMDD")
-    console.log(idx, key)
-    const image = getImageFromImages(key, images)
-    if (image) {
-        return image
-    }
-    // //can not find
-    // if (idx <= 1 && idx > -7) {
-    //     //only recent 7 days can get
-    //     getBingDailyImage(idx).then((result) => {
-    //         if (result && result.images?.length > 0) {
-    //             setBingTodayImage(result.images[0])
-    //             setCurrentImage(`url("https://www.bing.com${result.images[0].url}")`)
-    //         }
-    //     })
-    // }
+export function setBackgroundImage(image: string) {
+    LStorage.set("background-image", image)
 }
-
-export function setBingImages(imagesNew: BingImage[]) {
-    const images: BingImage[] = LStorage.get("bing_image_daily")
-    if (!images) {
-        LStorage.set("bing_image_daily", imagesNew)
-    } else {
-        //find oldest index
-        for (let x = 0; x < imagesNew.length; x++) {
-            const oldestDate = imagesNew[x].enddate;
-            for (let index = 0; index < images.length && index < 9; index++) {
-                if (images[index].enddate == oldestDate) {
-                    if (x == 0) {
-                        return
-                    }
-                    let newImages: BingImage[] = imagesNew.slice(0, x)
-                    LStorage.set("bing_image_daily", [...newImages, ...images])
-                    return
-                }
-            }
-        }
-        // 都没找到
-        LStorage.set("bing_image_daily", [...imagesNew, ...images])
-        return
-    }
-}
-
-export function setBingTodayImage(image: BingImage) {
-    const images: BingImage[] = LStorage.get("bing_image_daily")
-    if (!images) {
-        const imgs: BingImage[] = [image]
-        LStorage.set("bing_image_daily", imgs)
-    } else {
-        images.push(image)
-        LStorage.set("bing_image_daily", images)
-    }
-}
-

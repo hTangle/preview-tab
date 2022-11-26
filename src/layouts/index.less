@@ -13,3 +13,24 @@ body{
   padding: 0;
   margin: 0;
 }
+.image-demo-action-item {
+  height: 22px;
+  width: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: unset;
+  background: unset;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.image-demo-action-item:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-primary-light-3);
+}
+
+.image-demo-props table:nth-of-type(2) thead th:last-child,
+.image-demo-props table:nth-of-type(3) thead th:last-child {
+  width: 20%;
+}

@@ -12,15 +12,13 @@ import TimeShower from "@/component/time_shower";
 import {CSSProperties, useEffect, useState} from "react";
 import AddIcon from '@mui/icons-material/Add';
 import {
-    getBingDailyImage,
-    getBingHistoryDayImage,
-    getBingTodayImage, setBingImages,
-    setBingTodayImage
+    getBackgroundImage,
+    getBingTotalImages, setBackgroundImage,
 } from "@/service/bing_image_service";
-import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-
+import WallpaperIcon from '@mui/icons-material/Wallpaper';
 import {Dropdown, Menu, message, Modal, Space} from "antd";
+import {Image, List, Drawer} from '@arco-design/web-react';
+
 import {getCollections, hostExp, updateCollections} from "@/service/collection";
 import {Collection} from "@/types/collection";
 import CollectionButton from "@/component/collection_buttion";
@@ -28,16 +26,15 @@ import CollectionButton from "@/component/collection_buttion";
 import {BaiduSearch, BingSearch, GoogleSearch, SearchEngine} from "@/types/search";
 import {getCurrentSearchEngine, getSearchUrl, setDefaultSearchEngine} from "@/service/search";
 import TabSearchIcon from "@/component/search_icon";
-import {useLocation} from "react-router-dom";
-import {BingImage} from "@/types/bing";
+import {BingImageResponse} from "@/types/bing";
+import "@arco-design/web-react/dist/css/arco.css";
+import {IconInfoCircle} from "@arco-design/web-react/icon";
+
 
 export default function HomePage() {
-    const [bgImage, setBgImage] = useState(`url("https://www.bing.com/th?id=OHR.MountAbu_ZH-CN1348295593_1920x1080.jpg&rf=LaDigue_1920x1080.jpg&pid=hp")`)
+    const [bgImage, setBgImage] = useState(`url("https://bing.com/th?id=OHR.TurenneSunrise_ZH-CN2357226217_UHD.jpg&rf=LaDigue_UHD.jpg&pid=hp")`)
     const searchEngines: SearchEngine[] = [GoogleSearch, BaiduSearch, BingSearch];
     const [currentSearchEngine, setCurrentSearchEngine] = useState<SearchEngine>(getCurrentSearchEngine())
-    const [idx, setIdx] = useState(0);
-    const [imageDay, setImageDay] = useState()
-
     const [mainStyle, setMainStyle] = useState<CSSProperties>({
         textAlign: "center",
         width: "100%",
@@ -49,44 +46,17 @@ export default function HomePage() {
         backgroundImage: bgImage
     })
 
-    const updateBackgroundImage = (n: number) => {
-        console.log("before idx:", idx)
-        if ((n > 0 && idx >= 1) || (n < 0 && idx < -6)) {
-            return
-        }
-        setIdx(idx + n)
-        console.log("current idx:", idx)
-        const img: BingImage | undefined = getBingHistoryDayImage(idx)
-        if (img && img.url) {
-            setBgImage(`url("https://www.bing.com${img.url}")`)
-        }else{
-            if (idx <= 1 && idx > -7) {
-                //only recent 7 days can get
-                getBingDailyImage(idx).then((result) => {
-                    if (result && result.images?.length > 0) {
-                        setBingImages(result.images)
-                        setBgImage(`url("https://www.bing.com${result.images[0].url}")`)
-                    }
-                })
-            }
-        }
-    }
 
     useEffect(() => {
-        const date: Date = new Date()
-        const image = getBingTodayImage(date)
-        if (image) {
-            setBgImage(`url("https://www.bing.com${image.url}")`)
-        } else {
-            console.log("try to read image from bing")
-            getBingDailyImage().then((images) => {
-                if (images && images.images?.length > 0) {
-                    setBingTodayImage(images.images[0])
-                    setBgImage(`url("https://www.bing.com${images.images[0].url}")`)
-                }
-            })
-        }
+        const image = getBackgroundImage()
+        setBgImage(`url("${image}")`)
     }, [])
+
+    const setBackgroundImageToStorage = function (url: string) {
+        console.log("set url", url)
+        setBackgroundImage(url)
+        setBgImage(`url("${url}")`)
+    }
 
     useEffect(() => {
         setMainStyle({...mainStyle, backgroundImage: bgImage})
@@ -136,6 +106,27 @@ export default function HomePage() {
         }
     }
 
+    const [open, setOpen] = useState(false);
+
+    const showDrawer = () => {
+        setOpen(true);
+    };
+
+    const onClose = () => {
+        setOpen(false);
+    };
+
+
+    const [allBingImage, setAllBingImage] = useState<BingImageResponse[]>([]);
+    const updateAllBingImage = () => {
+        getBingTotalImages().then((result) => {
+            if (result.length !== allBingImage.length) {
+                setAllBingImage(result)
+            }
+        })
+    }
+
+
     return (
         <div style={mainStyle}>
             <Container style={{textAlign: "center", width: "100vh", height: "100vh"}}>
@@ -168,7 +159,6 @@ export default function HomePage() {
                         trigger={['click']}
                     >
                         <IconButton sx={{p: '10px'}} aria-label="menu">
-                            {/*<GoogleIcon/>*/}
                             <TabSearchIcon engine={currentSearchEngine}/>
                         </IconButton>
 
@@ -192,7 +182,12 @@ export default function HomePage() {
                         <SearchIcon/>
                     </IconButton>
                 </Paper>
-                <Space size={[6, 16]} wrap style={{margin: "100px auto", textAlign: "center", width: "100vh",backgroundColor:"rgba(211,211,211, .4)"}}>
+                <Space size={[6, 16]} wrap style={{
+                    margin: "100px auto",
+                    textAlign: "center",
+                    width: "100vh",
+                    backgroundColor: "rgba(211,211,211, .4)"
+                }}>
                     {
                         collections.map((value, index) => (
                             <CollectionButton collection={value} update_collection={refreshCollection}/>
@@ -207,14 +202,10 @@ export default function HomePage() {
             </Container>
             <div style={{position: "fixed", bottom: "3%", right: "2%"}}>
                 <Fab size="small" aria-label="add" onClick={() => {
-                    updateBackgroundImage(-1)
+                    updateAllBingImage()
+                    showDrawer()
                 }}>
-                    <KeyboardArrowLeftIcon/>
-                </Fab>
-                <Fab size="small" aria-label="edit" onClick={() => {
-                    updateBackgroundImage(1)
-                }}>
-                    <KeyboardArrowRightIcon/>
+                    <WallpaperIcon/>
                 </Fab>
             </div>
             <Modal title="添加网站" open={isModalOpen} onOk={() => {
@@ -256,6 +247,40 @@ export default function HomePage() {
                     }}/>
                 </Stack>
             </Modal>
+            <Drawer title="必应每日一图"
+                    width={"900px"}
+                    visible={open}
+                    placement="right" onCancel={onClose} onOk={onClose}>
+                <Image.PreviewGroup infinite>
+                    <List
+                        pagination={{pageSize: 8}}
+                        grid={{
+                            sm: 24,
+                            md: 12,
+                        }}
+                        dataSource={allBingImage}
+                        render={(value) => (
+                            <List.Item>
+                                <Image key={value.enddate}
+                                       alt={value.copyright}
+                                       width={400} src={"https://bing.com" + value.url.replaceAll("UHD", "1920x1080")}
+                                       description={value.copyright}
+                                       actions={[
+                                           <button
+                                               key='2'
+                                               className='image-demo-action-item'
+                                               onClick={(e) => {
+                                                   setBackgroundImageToStorage(`https://www.bing.com${value.url.replaceAll("1920x1080","UHD")}`)
+                                               }}
+                                           >
+                                               <IconInfoCircle/>
+                                           </button>
+                                       ]}
+                                />
+                            </List.Item>
+                        )}
+                    /></Image.PreviewGroup>
+            </Drawer>
         </div>
     );
 }
