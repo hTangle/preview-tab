@@ -15,7 +15,8 @@ export async function getBingImages(page: number, page_size: number = 12) {
 export async function getBingTotalImages() {
     return bingTotalRequest({
         method: "get",
-        url: "/bing",
+        // url: "/bing",
+        url: "https://ahsup.top/bing",
     })
 }
 

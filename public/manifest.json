@@ -1,5 +1,5 @@
 {
-  "name": "NewTabs",
+  "name": "PreviewTab",
   "version": "0.0.1",
   "description": "An extention of a powerful new tab",
   "browser_action": {
@@ -19,7 +19,8 @@
     "favicon",
     "chrome://favicon/",
     "edge://favicon/",
-    "https://cn.bing.com/"
+    "https://cn.bing.com/",
+    "https://ahsup.top/"
   ],
   "icons": {
     "128": "logo/google.ico"
